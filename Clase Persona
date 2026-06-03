@@ -1,0 +1,48 @@
+using System;
+
+class Persona
+{
+    public string Nombre { get; set; }
+    public int Hambre { get; set; }
+
+    public Persona(string nombre, int hambre)
+    {
+        Nombre = nombre;
+        Hambre = hambre;
+    }
+
+    public void BajarHambre()
+    {
+        Hambre = Math.Max(0, Hambre - 1);
+        Console.WriteLine($"⬇️ Nivel de comida disminuyó a {Hambre}/10 ({EstadoActual()})");
+    }
+
+    public void Comer(string alimento)
+    {
+        int aumento = alimento.ToLower() switch
+        {
+            "hamburguesa" => (int)(10 * 0.50),
+            "caramelo" => (int)(10 * 0.25),
+            "pan" => (int)(10 * 0.10),
+            _ => 0
+        };
+
+        if (aumento == 0)
+        {
+            Console.WriteLine("❌ Ese alimento no existe.");
+            return;
+        }
+
+        Console.WriteLine($"{Nombre} come {alimento} (+{aumento} comida)");
+        Hambre = Math.Min(10, Hambre + aumento);
+        Console.WriteLine($"🍽️ Nivel ahora: {Hambre}/10 ({EstadoActual()})");
+    }
+
+    public string EstadoActual()
+    {
+        if (Hambre == 10) return "Muy lleno";
+        if (Hambre >= 7) return "Satisfecho";
+        if (Hambre >= 4) return "Con hambre";
+        return "Muerto de hambre";
+    }
+}
