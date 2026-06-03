@@ -1,0 +1,31 @@
+using System;
+using System.IO;
+
+class Guardado
+{
+    private static string ruta = "datosMascota.txt";
+
+    public static void Guardar(int hambre, int limpieza, int salud)
+    {
+        File.WriteAllText(ruta, $"{hambre};{limpieza};{salud}");
+        Console.WriteLine("💾 Datos guardados (hambre + limpieza + salud).");
+    }
+
+    public static (int hambre, int limpieza, int salud) Cargar()
+    {
+        if (!File.Exists(ruta))
+        {
+            Console.WriteLine("⚠️ No hay datos guardados. Se inicia desde cero.");
+            return (5, 10, 10); // hambre 5, limpieza 10, salud 10
+        }
+
+        string contenido = File.ReadAllText(ruta);
+        string[] partes = contenido.Split(';');
+
+        int hambre = int.Parse(partes[0]);
+        int limpieza = int.Parse(partes[1]);
+        int salud = int.Parse(partes[2]);
+
+        return (hambre, limpieza, salud);
+    }
+}
