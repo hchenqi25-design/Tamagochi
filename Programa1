@@ -1,0 +1,85 @@
+using System;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        // Cargar datos guardados (hambre + limpieza + salud)
+        var datos = Guardado.Cargar();
+
+        Persona mascota = new Persona("Mascota", datos.hambre);
+        Limpieza ducha = new Limpieza(datos.limpieza);
+        Salud salud = new Salud(datos.salud);
+
+        while (true)
+        {
+            Console.WriteLine("\n--- ESTADO ---");
+            Console.WriteLine($"Comida: {mascota.Hambre}/10 ({mascota.EstadoActual()})");
+            Console.WriteLine($"Limpieza: {ducha.Nivel}/10");
+            Console.WriteLine($"Salud: {salud.Nivel}/10");
+
+            Console.WriteLine("\n¿Qué quieres hacer?");
+            Console.WriteLine("1. Dar hamburguesa");
+            Console.WriteLine("2. Dar caramelo");
+            Console.WriteLine("3. Dar pan");
+            Console.WriteLine("4. Duchar");
+            Console.WriteLine("5. Curar");
+            Console.WriteLine("6. Salir");
+
+            Console.Write("Elige opción: ");
+            string opcion = Console.ReadLine();
+
+            // ACCIONES
+            if (opcion == "1")
+            {
+                mascota.Comer("hamburguesa");
+            }
+            else if (opcion == "2")
+            {
+                mascota.Comer("caramelo");
+            }
+            else if (opcion == "3")
+            {
+                mascota.Comer("pan");
+            }
+            else if (opcion == "4")
+            {
+                ducha.Duchar(mascota.Hambre);
+            }
+            else if (opcion == "5")
+            {
+                salud.Curar();
+            }
+            else if (opcion == "6")
+            {
+                Guardado.Guardar(mascota.Hambre, ducha.Nivel, salud.Nivel);
+                return;
+            }
+            else
+            {
+                Console.WriteLine("Opción inválida.");
+            }
+
+            
+            if (opcion != "1" && opcion != "2" && opcion != "3")
+            {
+                mascota.BajarHambre();
+            }
+
+           
+            if (opcion != "4")
+            {
+                ducha.Bajar();
+            }
+
+          
+            if (opcion != "5")
+            {
+                salud.Bajar();
+            }
+
+           
+            Guardado.Guardar(mascota.Hambre, ducha.Nivel, salud.Nivel);
+        }
+    }
+}
