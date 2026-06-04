@@ -1,0 +1,32 @@
+using System.IO;
+
+class Guardado
+{
+    private static string ruta = "datosMascota.txt";
+
+    public static void Guardar(int hambre, int limpieza, int salud, int nivel, bool jetObtenida, bool carreraObtenida, bool pocionesBloqueadas)
+    {
+        File.WriteAllText(ruta, $"{hambre};{limpieza};{salud};{nivel};{jetObtenida};{carreraObtenida};{pocionesBloqueadas}");
+    }
+
+    public static (int hambre, int limpieza, int salud, int nivel, bool jetObtenida, bool carreraObtenida, bool pocionesBloqueadas) Cargar()
+    {
+        if (!File.Exists(ruta))
+        {
+            
+            return (10, 10, 10, 1, false, false, false);
+        }
+
+        string[] partes = File.ReadAllText(ruta).Split(';');
+
+        return (
+            int.Parse(partes[0]),
+            int.Parse(partes[1]),
+            int.Parse(partes[2]),
+            int.Parse(partes[3]),
+            bool.Parse(partes[4]),
+            bool.Parse(partes[5]),
+            bool.Parse(partes[6])
+        );
+    }
+}
