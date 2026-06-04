@@ -1,0 +1,143 @@
+using System;
+using System.Threading;
+
+class Salto
+{
+    public static bool pocion_carrera = false;
+
+    public static void Jugar()
+    {
+        Console.Clear();
+        Console.CursorVisible = false;
+
+        const int Ancho = 50;
+        const int Alto = 10;
+
+        int pouX = 5;
+        int pouY = Alto - 2;
+
+        int velocidadY = 0;
+        bool saltando = false;
+
+        int cactusX = Ancho - 1;
+        int huecoX = Ancho + 20;
+        int huecoAncho = 5;
+
+        Random rand = new Random();
+        bool gameOver = false;
+
+        int distancia = 0;
+        int meta = 1000;
+
+        while (!gameOver)
+        {
+            // CONTROLES
+            if (Console.KeyAvailable)
+            {
+                var tecla = Console.ReadKey(true);
+                if (tecla.Key == ConsoleKey.Spacebar && !saltando)
+                {
+                    velocidadY = -3;
+                    saltando = true;
+                }
+                if (tecla.Key == ConsoleKey.Escape)
+                {
+                    Console.Clear();
+                    return;
+                }
+            }
+
+            // FÍSICAS
+            pouY += velocidadY;
+            velocidadY++;
+
+            if (pouY >= Alto - 2)
+            {
+                pouY = Alto - 2;
+                saltando = false;
+            }
+
+            // OBSTÁCULOS
+            cactusX--;
+            if (cactusX < 0)
+                cactusX = Ancho - 1;
+
+            huecoX--;
+            if (huecoX < -huecoAncho)
+                huecoX = Ancho + rand.Next(10, 30);
+
+            // COLISIONES
+            if (pouX == cactusX && pouY == Alto - 2)
+                gameOver = true;
+
+            if (pouX >= huecoX && pouX <= huecoX + huecoAncho)
+                if (pouY >= Alto - 2)
+                    gameOver = true;
+
+            // DISTANCIA
+            distancia++;
+
+            // META ALCANZADA
+            if (distancia >= meta)
+            {
+                Console.Clear();
+                Console.WriteLine("🎉 ¡HAS GANADO LA CARRERA! 🎉");
+                Console.WriteLine($"Distancia recorrida: {distancia} metros");
+
+                // SOLO DA POCIÓN SI:
+                // - NO están bloqueadas
+                // - NO la obtuvo antes
+                if (!Program.pocionesBloqueadas && !Program.carreraObtenida)
+                {
+                    pocion_carrera = true;
+                    Program.carreraObtenida = true;
+
+                    Console.WriteLine("\n🏺 ¡Has obtenido la pocion_carrera! 🧪");
+                }
+                else
+                {
+                    Console.WriteLine("\n⚠ No puedes obtener más pociones de este minijuego.");
+                }
+
+                Console.WriteLine("\nPulsa una tecla para volver...");
+                Console.ReadKey(true);
+                Console.Clear();
+                return;
+            }
+
+            // DIBUJO
+            Console.SetCursorPosition(0, 0);
+
+            for (int y = 0; y < Alto; y++)
+            {
+                for (int x = 0; x < Ancho; x++)
+                {
+                    if (x == pouX && y == pouY)
+                        Console.Write("P");
+                    else if (x == cactusX && y == Alto - 2)
+                        Console.Write("Y");
+                    else if (x >= huecoX && x <= huecoX + huecoAncho && y == Alto - 1)
+                        Console.Write(" ");
+                    else if (y == Alto - 1)
+                        Console.Write("_");
+                    else
+                        Console.Write(" ");
+                }
+                Console.WriteLine();
+            }
+
+            Console.WriteLine($"Distancia: {distancia} m / {meta} m");
+            Console.WriteLine("ESPACIO = Saltar | ESC = Salir");
+
+            Thread.Sleep(80);
+        }
+
+        // GAME OVER
+        Console.SetCursorPosition(0, Alto + 2);
+        Console.WriteLine("💀 GAME OVER 💀");
+        Console.WriteLine($"Distancia recorrida: {distancia} metros");
+        Console.WriteLine("Pulsa una tecla para volver...");
+        Console.ReadKey(true);
+        Console.Clear();
+    }
+}
