@@ -1,0 +1,38 @@
+class Nivel
+{
+    public int Valor { get; private set; }
+    private int progreso;
+
+    private int[] requisitos = { 0, 50, 25000 };
+
+    public int Progreso => progreso;
+    public int ProgresoNecesario => requisitos[Valor];
+
+    public bool SubioDeNivel { get; private set; }
+
+    public Nivel(int nivelInicial)
+    {
+        Valor = nivelInicial;
+        progreso = 0;
+        SubioDeNivel = false;
+    }
+
+    public void AumentarProgreso()
+    {
+        if (Valor >= 3) return;
+
+        progreso++;
+
+        if (progreso >= requisitos[Valor])
+        {
+            Valor++;
+            SubioDeNivel = true;
+            progreso = 0;
+        }
+    }
+
+    public void ResetSubida()
+    {
+        SubioDeNivel = false;
+    }
+}
