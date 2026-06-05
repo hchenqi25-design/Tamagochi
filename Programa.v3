@@ -1,0 +1,184 @@
+using System;
+using System.Threading;
+
+class Program
+{
+    public static bool jetObtenida;
+    public static bool carreraObtenida;
+    public static bool caidaObtenida;
+    public static bool pocionesBloqueadas;
+
+    static void Main(string[] args)
+    {
+        var datos = Guardado.Cargar();
+
+        Persona mascota = new Persona("Mascota", datos.hambre);
+        Limpieza ducha = new Limpieza(datos.limpieza);
+        Salud salud = new Salud(datos.salud);
+        Mimos mimos = new Mimos(datos.mimos);
+        Nivel nivel = new Nivel(datos.nivel);
+
+        jetObtenida = datos.jetObtenida;
+        carreraObtenida = datos.carreraObtenida;
+        caidaObtenida = datos.caidaObtenida;
+        pocionesBloqueadas = datos.pocionesBloqueadas;
+
+        int tiempoJugado = datos.tiempoJugado;
+
+        DateTime ultimoSegundo = DateTime.Now;
+
+        Random rand = new Random();
+        int tiempoParaBajar = 8;
+        DateTime proximaBajada = DateTime.Now.AddSeconds(tiempoParaBajar);
+        int barraActual = rand.Next(1, 5);
+
+        bool primeraVez = true;
+
+        while (true)
+        {
+            if (!primeraVez)
+                Console.Clear();
+            primeraVez = false;
+
+            // CONTADOR DE TIEMPO JUGADO
+            if ((DateTime.Now - ultimoSegundo).TotalSeconds >= 1)
+            {
+                tiempoJugado++;
+                ultimoSegundo = DateTime.Now;
+            }
+
+            // BAJADA AUTOMÁTICA
+            if (DateTime.Now >= proximaBajada)
+            {
+                if (barraActual == 1) mascota.Hambre.BajarHambre();
+                else if (barraActual == 2) ducha.Bajar();
+                else if (barraActual == 3) salud.Bajar();
+                else if (barraActual == 4) mimos.Bajar();
+
+                int nuevaBarra;
+                do nuevaBarra = rand.Next(1, 5);
+                while (nuevaBarra == barraActual);
+
+                barraActual = nuevaBarra;
+
+                if (tiempoParaBajar > 3) tiempoParaBajar--;
+
+                proximaBajada = DateTime.Now.AddSeconds(tiempoParaBajar);
+
+                Guardado.Guardar(
+                    mascota.Hambre.Hambre, ducha.Nivel, salud.Nivel, mimos.Nivel, nivel.Valor,
+                    jetObtenida, carreraObtenida, caidaObtenida,
+                    pocionesBloqueadas, tiempoJugado
+                );
+            }
+
+            // ESTADO
+            Console.WriteLine("--- ESTADO ---");
+            Console.WriteLine($"Comida: {mascota.Hambre.Hambre}/10 ({mascota.Hambre.EstadoActual()})");
+            Console.WriteLine($"Limpieza: {ducha.Nivel}/10");
+            Console.WriteLine($"Salud: {salud.Nivel}/10");
+            Console.WriteLine($"Mimos: {mimos.Nivel}/10");
+            Console.WriteLine($"Nivel: {nivel.Valor}");
+
+            int min = tiempoJugado / 60;
+            int seg = tiempoJugado % 60;
+            Console.WriteLine($"Tiempo jugado: {min:D2}:{seg:D2}");
+
+            // INVENTARIO
+            Console.WriteLine("\n--- INVENTARIO DE POCIONES ---");
+            Console.WriteLine($"Poción Jet: {(Jet.pocion_jet ? 1 : 0)}");
+            Console.WriteLine($"Poción Carrera: {(Salto.pocion_carrera ? 1 : 0)}");
+            Console.WriteLine($"Poción Caída: {(Caida.pocion_caida ? 1 : 0)}");
+
+            Console.WriteLine(pocionesBloqueadas
+                ? "Estado de pociones: BLOQUEADAS ❌"
+                : "Estado de pociones: DISPONIBLES ✔");
+
+            // MENÚ
+            Console.WriteLine("\n¿Qué quieres hacer?");
+            Console.WriteLine("1. Dar hamburguesa");
+            Console.WriteLine("2. Dar caramelo");
+            Console.WriteLine("3. Dar pan");
+            Console.WriteLine("4. Duchar");
+            Console.WriteLine("5. Curar");
+            Console.WriteLine("6. Dar mimos 💖");
+            Console.WriteLine("7. Salir");
+            Console.WriteLine("8. Jugar Jetpack");
+            Console.WriteLine("9. Jugar Dino Pou");
+            Console.WriteLine("10. Jugar Caída Libre");
+            Console.WriteLine("11. Usar poción Jet");
+            Console.WriteLine("12. Usar poción Carrera");
+            Console.WriteLine("13. Usar poción Caída");
+
+            Console.Write("Elige opción: ");
+            string opcion = Console.ReadLine();
+
+            // ACCIONES
+            if (opcion == "1") { mascota.Hambre.ComerAlimento("hamburguesa"); nivel.AumentarProgreso(); }
+            else if (opcion == "2") { mascota.Hambre.ComerAlimento("caramelo"); nivel.AumentarProgreso(); }
+            else if (opcion == "3") { mascota.Hambre.ComerAlimento("pan"); nivel.AumentarProgreso(); }
+            else if (opcion == "4") { ducha.Duchar(mascota.Hambre.Hambre); nivel.AumentarProgreso(); }
+            else if (opcion == "5") { salud.Curar(); nivel.AumentarProgreso(); }
+            else if (opcion == "6") { mimos.DarMimos(); nivel.AumentarProgreso(); }
+            else if (opcion == "7")
+            {
+                Guardado.Guardar(
+                    mascota.Hambre.Hambre, ducha.Nivel, salud.Nivel, mimos.Nivel, nivel.Valor,
+                    jetObtenida, carreraObtenida, caidaObtenida,
+                    pocionesBloqueadas, tiempoJugado
+                );
+                return;
+            }
+            else if (opcion == "8") { Jet.Jugar(); mascota.Hambre.BajarHambre(); }
+            else if (opcion == "9") { Salto.Jugar(); mascota.Hambre.BajarHambre(); }
+            else if (opcion == "10") { Caida.Jugar(); mascota.Hambre.BajarHambre(); }
+
+            // USAR POCIONES
+            else if (opcion == "11")
+            {
+                if (!Jet.pocion_jet) Console.WriteLine("\n❌ No tienes la pocion_jet.");
+                else
+                {
+                    Jet.pocion_jet = false;
+                    Salto.pocion_carrera = false;
+                    Caida.pocion_caida = false;
+                    pocionesBloqueadas = true;
+                    Console.WriteLine("\n✔ Poción Jet usada con éxito.");
+                }
+                Thread.Sleep(1500);
+            }
+            else if (opcion == "12")
+            {
+                if (!Salto.pocion_carrera) Console.WriteLine("\n❌ No tienes la pocion_carrera.");
+                else
+                {
+                    Salto.pocion_carrera = false;
+                    Jet.pocion_jet = false;
+                    Caida.pocion_caida = false;
+                    pocionesBloqueadas = true;
+                    Console.WriteLine("\n✔ Poción Carrera usada con éxito.");
+                }
+                Thread.Sleep(1500);
+            }
+            else if (opcion == "13")
+            {
+                if (!Caida.pocion_caida) Console.WriteLine("\n❌ No tienes la pocion_caida.");
+                else
+                {
+                    Caida.pocion_caida = false;
+                    Jet.pocion_jet = false;
+                    Salto.pocion_carrera = false;
+                    pocionesBloqueadas = true;
+                    Console.WriteLine("\n✔ Poción Caída usada con éxito.");
+                }
+                Thread.Sleep(1500);
+            }
+
+            Guardado.Guardar(
+                mascota.Hambre.Hambre, ducha.Nivel, salud.Nivel, mimos.Nivel, nivel.Valor,
+                jetObtenida, carreraObtenida, caidaObtenida,
+                pocionesBloqueadas, tiempoJugado
+            );
+        }
+    }
+}
