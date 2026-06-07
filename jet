@@ -1,0 +1,145 @@
+using System;
+using System.Threading;
+
+class Jet
+{
+    public static bool pocion_jet = false;
+
+    public static void Jugar()
+    {
+        Console.Clear();
+        Console.CursorVisible = false;
+
+        const int Ancho = 40;
+        const int Alto = 15;
+
+        int pouX = 5;
+        int pouY = Alto / 2;
+
+        float velocidadY = 0;
+        float gravedad = 0.4f;
+        float fuerzaJetpack = 1.2f;
+
+        int obstaculoX = Ancho - 1;
+        int huecoY = 7;
+        int huecoAltura = 5;
+
+        bool gameOver = false;
+        Random rand = new Random();
+
+        int distancia = 0;
+        int meta = 1000;
+
+        while (!gameOver)
+        {
+            // CONTROLES
+            if (Console.KeyAvailable)
+            {
+                var tecla = Console.ReadKey(true);
+                if (tecla.Key == ConsoleKey.Spacebar)
+                {
+                    velocidadY = -fuerzaJetpack;
+                }
+                if (tecla.Key == ConsoleKey.Escape)
+                {
+                    Console.Clear();
+                    return;
+                }
+            }
+
+            // FÍSICAS
+            velocidadY += gravedad;
+            pouY += (int)Math.Round(velocidadY);
+
+            if (pouY < 0) pouY = 0;
+            if (pouY > Alto - 1) pouY = Alto - 1;
+
+            // OBSTÁCULO
+            obstaculoX--;
+            if (obstaculoX < 0)
+            {
+                obstaculoX = Ancho - 1;
+                huecoY = rand.Next(2, Alto - huecoAltura - 1);
+            }
+
+            // COLISIÓN
+            if (pouX == obstaculoX)
+            {
+                if (pouY < huecoY || pouY > huecoY + huecoAltura)
+                {
+                    gameOver = true;
+                }
+            }
+
+            // DISTANCIA
+            distancia++;
+
+            // META ALCANZADA
+            if (distancia >= meta)
+            {
+                Console.Clear();
+                Console.WriteLine("🚀 ¡HAS COMPLETADO EL JETPACK! 🚀");
+                Console.WriteLine($"Distancia recorrida: {distancia} metros");
+
+                // SOLO DA POCIÓN SI:
+                // - NO están bloqueadas
+                // - NO la obtuvo antes
+                if (!Program.pocionesBloqueadas && !Program.jetObtenida)
+                {
+                    pocion_jet = true;
+                    Program.jetObtenida = true;
+
+                    Console.WriteLine("\n🏺 ¡Has obtenido la pocion_jet! 🧪");
+                }
+                else
+                {
+                    Console.WriteLine("\n⚠ No puedes obtener más pociones de este minijuego.");
+                }
+
+                Console.WriteLine("\nPulsa una tecla para volver...");
+                Console.ReadKey(true);
+                Console.Clear();
+                return;
+            }
+
+            // DIBUJO
+            Console.SetCursorPosition(0, 0);
+
+            for (int y = 0; y < Alto; y++)
+            {
+                for (int x = 0; x < Ancho; x++)
+                {
+                    if (x == pouX && y == pouY)
+                    {
+                        Console.Write("P");
+                    }
+                    else if (x == obstaculoX && (y < huecoY || y > huecoY + huecoAltura))
+                    {
+                        Console.Write("|");
+                    }
+                    else
+                    {
+                        Console.Write(" ");
+                    }
+                }
+                Console.WriteLine();
+            }
+
+            Console.WriteLine($"Distancia: {distancia} m / {meta} m");
+            Console.WriteLine("ESPACIO = Jetpack | ESC = Salir");
+
+            Thread.Sleep(80);
+        }
+
+        // GAME OVER
+        int mensajeY = Math.Min(Alto - 1, Console.WindowHeight - 2);
+        Console.SetCursorPosition(0, mensajeY);
+
+        Console.WriteLine("💀 GAME OVER 💀");
+        Console.WriteLine($"Distancia recorrida: {distancia} metros");
+        Console.WriteLine("No has conseguido la pocion_jet...");
+        Console.WriteLine("Pulsa una tecla para volver...");
+        Console.ReadKey(true);
+        Console.Clear();
+    }
+}
