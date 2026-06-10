@@ -1,0 +1,61 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEditor.Build.Content;
+using UnityEngine;
+using UnityEngine.UI;
+
+public class MinijuegoHielo : MonoBehaviour
+{
+   
+    [SerializeField] private Transform groundCheck;
+    [SerializeField] private LayerMask ground;
+    [SerializeField] private float radio;
+    public GameObject pantallaPerder;
+    public GameObject pantallaGanar;
+    public Button pocionHielo;
+
+    private Rigidbody2D patoPatin;
+    void Start()
+    {
+        patoPatin= GetComponent<Rigidbody2D>();
+    }
+
+    void Update()
+    {
+        bool enSuelo = Physics2D.OverlapCircle(groundCheck.position, radio, ground);
+        if (Input.GetKeyDown(KeyCode.Mouse0))
+        {
+            if (enSuelo)
+            {
+                patoPatin.AddForce(Vector2.up * 1000);
+            }
+        }
+    }
+    private void OnDrawGizmos()
+    {
+        Gizmos.DrawWireSphere(groundCheck.position, radio);
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if(collision.gameObject.CompareTag("Obstaculo"))
+        {
+            pantallaPerder.SetActive(true);
+            Time.timeScale = 0f;
+        }
+
+    }
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.gameObject.CompareTag("Premio"))
+        {
+            pantallaGanar.SetActive(true);
+            Time.timeScale = 0f;
+            //pocionHielo.SetActive(true);
+            
+            Debug.Log("Trigger");
+        }
+    }
+
+
+}
