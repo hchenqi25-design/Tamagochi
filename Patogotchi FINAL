@@ -1,0 +1,678 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
+using Unity.VisualScripting;
+using UnityEngine.SceneManagement;
+
+
+public class AccionesBoton : MonoBehaviour
+{
+
+   
+
+    public float hambre=1;
+    public float salud=10;
+    public float limpieza=10;
+    public float cuidados=10;
+
+    //SONIDO
+    public AudioSource sonidoPato;
+    private float siguienteTiempoEspera=0f;
+    public AudioSource levelUp;
+    public AudioSource subirBarraSonido;
+    public AudioSource sonidoMuerte;
+    public AudioSource botonesSonido;
+
+
+    //Skins
+    public GameObject huevo;
+    public GameObject patoNormal;
+    public GameObject patoFuego;
+    public GameObject patoHielo;
+    public GameObject patoElectrico;
+
+    //Muerte
+    public GameObject patoMuerto;
+    public GameObject animacionPatoMuerto;
+    public Button BotonReinicioMuerte;
+
+    //Panel principal
+    public GameObject barras;
+    public GameObject panelNormal;
+    public Button comidaBoton;
+    public Button curaBoton;
+    public Button duchaBoton;
+    public Button cuidadoBoton;
+    public Button juegosBoton;
+    public Button salidaTotalBoton;
+
+    public GameObject candado;
+
+
+    public Button iniciarJuego;
+    public Button confirmarNombre;
+    public TMP_Text textoInicio;
+    public TMP_InputField inputNombre;
+
+    //SubirNivel
+    public GameObject flechaSubir;
+    public TMP_Text numeroFlecha;
+
+    //Primer panel
+    public GameObject panelInicio;
+    public TMP_InputField introduccionNombre;
+
+
+    public TMP_Text nombre;
+    public TMP_Text nivel;
+
+
+    //Botones comida
+    public GameObject panelComidas;
+    public Button hamburguesa;
+    public Button caramelo;
+    public Button pan;
+    public Button salirComidas;
+    
+    //Botones medicina
+    public GameObject panelMedicina;
+    public Button medicina1;
+    public Button medicina2;
+    public Button medicina3;
+    public Button salirMedicinas;
+
+    //Botones ducha
+    public GameObject ducha;
+
+    //Botones cuidados
+    public GameObject mano;
+
+    //Botones juegos
+    public GameObject panelJuegos;
+    public Button juegos1;
+    public Button juegos2;
+    public Button juegos3;
+    public Button salidaJuegos;
+
+        //Hielo
+        public GameObject panelJuegoHielo;
+        public GameObject sueloHielo;
+        public GameObject fondoHielo;
+        public GameObject picosHielo;
+        public GameObject patoPatinHielo;
+        public GameObject groundCheckHielo;
+
+        public Vector3 sueloHieloV;
+        public Vector3 fondoHieloV;
+        public Vector3 picosHieloV;
+        public Vector3 patoPatinHieloV;
+        public Vector3 groundCheckHieloV;
+
+        public GameObject pantallaPerderHielo;
+        public GameObject pantallaGanarHielo;
+
+        //Electricidad
+        public GameObject panelJuegoElectricidad;
+
+        public GameObject fondoElectricidad;
+        public GameObject patoParaguas;
+        public GameObject nubesElectricidad;
+
+       public Vector3 fondoElectricidadV;
+       public Vector3 patoParaguasV;
+       public Vector3 nubesElectricidadV;
+
+       public GameObject pantallaGanarElectricidad;
+       public GameObject pantallaPerderElectricidad;
+
+       //Fuego
+       public GameObject panelJuegoFuego;
+      
+       public GameObject fondoFuego;
+       public GameObject picosFuego;
+       public GameObject patoJet;
+
+       public Vector3 fondoFuegoV;
+       public Vector3 picosFuegoV;
+       public Vector3 patoJetV;
+
+       public GameObject pantallaGanarFuego;
+       public GameObject pantallaPerderFuego;
+
+
+
+
+
+    //Botones opcion salida total
+
+    public GameObject panelSalidaTotal;
+
+
+    //Para el tiempo
+    public int minutos=0;
+    public float segundos=0;
+    bool tiempo = false;
+
+    //Niveles:
+    public int contNiv = 1;
+
+    bool desbloquearJuegos=false;
+
+    //Barras de cuidado
+    float barraMaximo = 10;
+    
+    public Image rellenoBarraComida;
+    public Image rellenoBarraLimpieza;
+    public Image rellenoBarraSalud;
+    public Image rellenoBarraCuidado;
+
+    public float danoPorSegundo = 0.1f; //VIDA QUITAR
+
+    //Pociones
+    public Button pocionFuego;
+    public Button pocionHielo;
+    public Button pocionElectricidad;
+
+    void Update()
+    {
+        nivel.text = ("Lv: " + contNiv);
+
+        if (tiempo == true)//Tiempo
+        {
+
+            segundos += Time.deltaTime;
+
+        
+            if (segundos >= 60)
+            {
+                segundos = 0;
+                minutos += 1;
+
+            }
+
+            if ((minutos == 1)&& (segundos == 0))
+            {
+                contNiv = 2;
+                huevo.SetActive(false);
+                patoNormal.SetActive(true);
+                levelUp.Play();
+
+            }
+
+            if ((minutos == 2) && (segundos == 0))
+            {
+                
+                candado.SetActive(false);
+                curaBoton.interactable = true;
+                desbloquearJuegos = true;
+                juegosBoton.interactable = true;
+                botonesSonido.Play();
+
+            }
+
+            if (contNiv == 3)
+            {
+                pocionHielo.gameObject.SetActive(false);
+                pocionFuego.gameObject.SetActive(false);
+                pocionElectricidad.gameObject.SetActive(false);
+            }
+
+            if (Time.time >= siguienteTiempoEspera)//SonidoPato
+            {
+                sonidoPato.Play();
+                siguienteTiempoEspera = Time.time + 15f;
+
+            }
+
+        }
+        Debug.Log(minutos + ":" + segundos);
+
+        //Barras cuidado
+        rellenoBarraComida.fillAmount = hambre / barraMaximo;
+        rellenoBarraLimpieza.fillAmount = limpieza / barraMaximo;
+        rellenoBarraSalud.fillAmount = salud / barraMaximo;
+        rellenoBarraCuidado.fillAmount = cuidados / barraMaximo;
+
+        if (hambre > 10)//BARRAS MAXIMO
+        {
+            hambre = 10;
+            
+        }
+        if(limpieza > 10)
+        {
+            limpieza = 10;
+        }
+        if (salud > 10)
+        {
+            salud = 10;
+        }
+        if(cuidados > 10)
+        {
+           cuidados = 10;
+        }
+       
+       if (tiempo == true)
+        {
+            hambre -= danoPorSegundo * Time.deltaTime * 0.2f;
+            limpieza -= danoPorSegundo * Time.deltaTime * 0.06f;
+            salud -= danoPorSegundo * Time.deltaTime * 0.4f;
+            cuidados -= danoPorSegundo * Time.deltaTime * 0.05f;
+        }
+
+       if((hambre<=0)|| (limpieza <= 0) || (salud <= 0) || (cuidados <= 0))
+        {
+            MatarPato();
+        }
+        
+
+    }
+
+    void Start()
+    {
+
+        panelNormal.SetActive(false);
+        panelInicio.SetActive(true);
+        confirmarNombre.gameObject.SetActive(false);
+        textoInicio.gameObject.SetActive(false);
+        inputNombre.gameObject.SetActive(false);
+
+        //Guardar posiciones minijuegos
+        sueloHieloV = sueloHielo.transform.position;
+        picosHieloV = picosHielo.transform.position;
+        fondoHieloV = fondoHielo.transform.position;
+        patoPatinHieloV = patoPatinHielo.transform.position;
+        groundCheckHieloV= groundCheckHielo.transform.position;
+
+        nubesElectricidadV = nubesElectricidad.transform.position;
+        fondoElectricidadV = fondoElectricidad.transform.position;
+        patoParaguasV= patoParaguas.transform.position;
+
+        fondoFuegoV= fondoFuego.transform.position;
+        picosFuegoV = picosFuego.transform.position;
+        patoJetV = patoJet.transform.position;
+
+    }
+
+
+    public void AbrirPaneles()
+    {
+        comidaBoton.interactable = false;
+        curaBoton.interactable = false;
+        duchaBoton.interactable = false;
+        cuidadoBoton.interactable = false;
+        comidaBoton.interactable = false;
+        juegosBoton.interactable = false;
+        salidaTotalBoton.interactable = false;
+
+        barras.SetActive(false);
+
+        pocionFuego.interactable=false;
+        pocionHielo.interactable = false;
+        pocionElectricidad.interactable = false;
+
+
+        Color nuevaOpacidadNivel = nivel.color;
+        nuevaOpacidadNivel.a = 0.5f;
+        nivel.color = nuevaOpacidadNivel;
+
+        Color nuevaOpacidadNombre = nombre.color;
+        nuevaOpacidadNombre.a = 0.5f;
+        nombre.color = nuevaOpacidadNombre;
+
+
+    }
+
+    public void CerrarPaneles()
+    {
+        comidaBoton.interactable = true;
+        curaBoton.interactable = true;
+        duchaBoton.interactable = true;
+        cuidadoBoton.interactable = true;
+        comidaBoton.interactable = true;
+        if(desbloquearJuegos==true)
+        juegosBoton.interactable = true;
+        salidaTotalBoton.interactable = true;
+
+        barras.SetActive(true);
+
+        pocionFuego.interactable = true;
+        pocionHielo.interactable = true;
+        pocionElectricidad.interactable = true;
+
+        Color nuevaOpacidadNivel = nivel.color;
+        nuevaOpacidadNivel.a = 1f;
+        nivel.color = nuevaOpacidadNivel;
+
+        Color nuevaOpacidadNombre = nombre.color;
+        nuevaOpacidadNombre.a = 1f;
+        nombre.color = nuevaOpacidadNombre;
+    }
+
+  
+
+    //Panel principal 1
+    public void IniciarJuego()
+    {
+
+        iniciarJuego.gameObject.SetActive(false);
+        confirmarNombre.gameObject.SetActive(true);
+        textoInicio.gameObject.SetActive(true);
+        inputNombre.gameObject.SetActive(true);
+        botonesSonido.Play();
+
+    }
+
+    //Panel principal 2
+    public void ConfirmarNombre()
+    {
+        panelNormal.SetActive(true);
+        nombre.text = introduccionNombre.text;
+        panelInicio.SetActive(false);
+        tiempo = true;
+
+        botonesSonido.Play();
+
+    }
+
+
+
+    //ComidaBotón
+    public void PulsarBotonComida()
+    {
+
+        panelComidas.SetActive(true);
+        AbrirPaneles();
+        botonesSonido.Play();
+
+    }
+    public void DarComida(int valor)
+    {
+       
+        hambre += valor;
+        panelComidas.SetActive(false);
+        CerrarPaneles();
+
+        numeroFlecha.text = ("+" + valor);
+        StartCoroutine(ApareceFlechaYPuntos());
+        subirBarraSonido.Play();
+    }
+    
+
+    //SaludBotón
+    public void PulsarBotonSalud()
+    {
+
+        panelMedicina.SetActive(true);
+        AbrirPaneles();
+        botonesSonido.Play();
+    }
+    public void DarMedicina(int valor)
+    {
+       
+        salud += valor;
+        panelMedicina.SetActive(false);
+        CerrarPaneles();
+
+        numeroFlecha.text = ("+" + valor);
+        StartCoroutine(ApareceFlechaYPuntos());
+        subirBarraSonido.Play();
+    }
+
+    //DuchaBotón
+    public void PulsarBotonDucha()
+    {
+
+        StartCoroutine(MostrarDucha());
+        
+        limpieza += 3;
+        barras.SetActive(true);
+
+        numeroFlecha.text = ("+" + 3);
+        StartCoroutine(ApareceFlechaYPuntos());
+        subirBarraSonido.Play();
+
+    }
+    private IEnumerator MostrarDucha()
+    {
+
+        ducha.SetActive(true);
+        AbrirPaneles();
+        yield return new WaitForSeconds(3);
+        ducha.SetActive(false);
+        CerrarPaneles() ;
+
+    }
+
+
+    //CuidadosBoton
+    public void PulsarBotonCuidados()
+    {
+
+        StartCoroutine(MostrarMano());
+
+        cuidados += 2;
+        barras.SetActive(true);
+
+
+        numeroFlecha.text = ("+" + 2);
+        StartCoroutine(ApareceFlechaYPuntos());
+        subirBarraSonido.Play();
+
+    }
+    private IEnumerator MostrarMano()
+    {
+
+        mano.SetActive(true);
+        AbrirPaneles() ;
+        yield return new WaitForSeconds(3);
+        mano.SetActive(false);
+        CerrarPaneles() ;
+
+    }
+
+    //JuegosBotón
+    public void PulsarBotonJuegos()
+    {
+
+        panelJuegos.SetActive(true);
+        AbrirPaneles();
+        botonesSonido.Play();
+    }
+
+    public void IrAJuegoHielo()
+    {
+        panelJuegoHielo.SetActive(true);
+        panelNormal.SetActive(false);
+        panelJuegos.SetActive(false);
+
+        tiempo = false;//guardartiempo
+        botonesSonido.Play();
+    }
+    public void ReiniciarJuegoHielo()
+    {
+        sueloHielo.transform.position = sueloHieloV;
+        picosHielo.transform.position = picosHieloV;
+        fondoHielo.transform.position = fondoHieloV;
+        patoPatinHielo.transform.position = patoPatinHieloV;
+
+        pantallaGanarHielo.SetActive(false);
+        pantallaPerderHielo.SetActive(false);
+
+        Time.timeScale = 1f;
+        botonesSonido.Play();
+    }
+
+
+    public void IrAJuegoElectricidad()
+    {
+        panelJuegoElectricidad.SetActive(true);
+        panelNormal.SetActive(false);
+        panelJuegos.SetActive(false);
+
+        tiempo = false;//guardartiempo
+        botonesSonido.Play();
+    }
+    public MinijuegoElectricidad boolElectr;
+    public void ReiniciarJuegoElectrico()
+    {
+       
+
+        fondoElectricidad.transform.position = fondoElectricidadV;
+        nubesElectricidad.transform.position = nubesElectricidadV;
+        patoParaguas.transform.position = patoParaguasV;
+
+        pantallaGanarElectricidad.SetActive(false);
+        pantallaPerderElectricidad.SetActive(false);
+
+        boolElectr.movRaton = true;
+        Time.timeScale = 1f;
+
+        botonesSonido.Play();
+    }
+    public void IrAJuegoFuego()
+    {
+        panelJuegoFuego.SetActive(true);
+        panelNormal.SetActive(false);
+        panelJuegos.SetActive(false);
+
+        tiempo = false;//guardartiempo
+        botonesSonido.Play();
+    }
+    public void ReiniciarJuegoFuego()
+    {
+
+        fondoFuego.transform.position = fondoFuegoV;
+        picosFuego.transform.position = picosFuegoV;
+        patoJet.transform.position = patoJetV;
+
+        pantallaGanarFuego.SetActive(false);
+        pantallaPerderFuego.SetActive(false);
+
+        Time.timeScale = 1f;
+
+        botonesSonido.Play();
+    }
+
+    //Salida Total
+
+    public void PulsarBotonSalidaTotal()
+    {
+        panelSalidaTotal.SetActive(true);
+        AbrirPaneles();
+        botonesSonido.Play();
+    }
+
+
+    //POCIONES
+
+    public void PocionFuegoBoton()
+    {
+        patoNormal.SetActive(false);
+        patoFuego.SetActive(true);
+        contNiv = 3;
+        levelUp.Play();
+    }
+    public void PocionHieloBoton()
+    {
+        patoNormal.SetActive(false);
+        patoHielo.SetActive(true);
+        contNiv = 3;
+        levelUp.Play();
+    }
+    public void PocionElectricidadBoton()
+    {
+        patoNormal.SetActive(false);
+        patoElectrico.SetActive(true);
+        contNiv = 3;
+        levelUp.Play();
+    }
+
+    public void MatarPato()
+    {
+        huevo.SetActive(false);
+        patoNormal.SetActive(false);
+        patoElectrico.SetActive(false);
+        patoFuego.SetActive(false);
+        patoHielo.SetActive(false);
+        
+        AbrirPaneles();
+        sonidoMuerte.Play();
+        animacionPatoMuerto.SetActive(true);
+
+        patoMuerto.gameObject.transform.Translate(Vector2.up * 2 * Time.deltaTime);
+
+        StartCoroutine(EsperarYActivarText());
+        
+    }
+    public IEnumerator EsperarYActivarText()
+    {
+        yield return new WaitForSeconds(3);
+        BotonReinicioMuerte.gameObject.SetActive(true);
+    }
+
+    private IEnumerator ApareceFlechaYPuntos()
+    {
+
+        flechaSubir.gameObject.SetActive(true);
+
+        yield return new WaitForSeconds(1);
+        flechaSubir.gameObject.SetActive(false);
+
+    }
+
+    public void SalirPantallaPrincipal()//Salidas menos la del la pantalla normal (final)
+    {
+        panelNormal.SetActive(true);
+
+        panelComidas.SetActive(false);
+        panelMedicina.SetActive(false);
+        panelJuegos.SetActive(false);
+        panelSalidaTotal.SetActive(false);
+       
+
+        panelJuegoHielo.SetActive(false);
+        
+        panelJuegoElectricidad.SetActive(false);
+        boolElectr.movRaton = true;
+
+        panelJuegoFuego.SetActive(false);
+
+        tiempo = true;//tiempo guardado
+
+        ReiniciarJuegoHielo();
+        ReiniciarJuegoElectrico();
+        ReiniciarJuegoFuego();
+       
+        CerrarPaneles();
+        botonesSonido.Play();
+    }
+
+    public void ReiniciarJuegoDeCero()
+    {
+      
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        botonesSonido.Play();
+    }
+
+
+    public void ZAgrgarTiempoEnPresentacion()
+    {
+        segundos = segundos + 55;
+    }
+    public void ZAgregarTodasPociones()
+    {
+        pocionFuego.gameObject.SetActive(true);
+        pocionHielo.gameObject.SetActive(true);
+        pocionElectricidad.gameObject.SetActive(true);
+    }
+
+    public void SalirJuegoFinal()
+    {
+        Application.Quit();
+    }
+
+   
+}
